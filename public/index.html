@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FTP Web UI</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1><i class="fas fa-server"></i> FTP Web UI</h1>
+            <div class="connection-status" id="connectionStatus">
+                <span class="status-dot disconnected"></span>
+                <span class="status-text">Not Connected</span>
+            </div>
+        </header>
+
+        <!-- Connection Panel -->
+        <div class="connection-panel" id="connectionPanel">
+            <h2>Connect to FTP Server</h2>
+            <form id="connectionForm">
+                <div class="form-group">
+                    <label for="host">Host:</label>
+                    <input type="text" id="host" name="host" placeholder="e.g., localhost or 192.168.1.100" required>
+                </div>
+                <div class="form-group">
+                    <label for="port">Port:</label>
+                    <input type="number" id="port" name="port" value="21" required>
+                </div>
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="secure" name="secure">
+                        Use Secure FTP (FTPS)
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plug"></i> Connect
+                </button>
+            </form>
+        </div>
+
+        <!-- Main Interface -->
+        <div class="main-interface" id="mainInterface" style="display: none;">
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <button class="btn btn-secondary" id="disconnectBtn">
+                        <i class="fas fa-plug"></i> Disconnect
+                    </button>
+                    <button class="btn btn-secondary" id="refreshBtn">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button class="btn btn-success" id="uploadBtn">
+                        <i class="fas fa-upload"></i> Upload
+                    </button>
+                    <button class="btn btn-info" id="newFolderBtn">
+                        <i class="fas fa-folder-plus"></i> New Folder
+                    </button>
+                </div>
+                <div class="toolbar-right">
+                    <div class="breadcrumb" id="breadcrumb">
+                        <span class="breadcrumb-item active">/</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Explorer -->
+            <div class="file-explorer">
+                <table class="file-table" id="fileTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Size</th>
+                            <th>Modified</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fileTableBody">
+                        <!-- Files will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Upload Modal -->
+        <div class="modal" id="uploadModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Upload Files</h3>
+                    <span class="close" id="closeUploadModal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="upload-area" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drag and drop files here or click to select</p>
+                        <input type="file" id="fileInput" multiple style="display: none;">
+                    </div>
+                    <div class="upload-progress" id="uploadProgress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <span class="progress-text" id="progressText">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Folder Modal -->
+        <div class="modal" id="newFolderModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Create New Folder</h3>
+                    <span class="close" id="closeNewFolderModal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="newFolderForm">
+                        <div class="form-group">
+                            <label for="folderName">Folder Name:</label>
+                            <input type="text" id="folderName" name="folderName" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create Folder</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rename Modal -->
+        <div class="modal" id="renameModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Rename Item</h3>
+                    <span class="close" id="closeRenameModal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="renameForm">
+                        <div class="form-group">
+                            <label for="newName">New Name:</label>
+                            <input type="text" id="newName" name="newName" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Rename</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div class="loading" id="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Loading...</p>
+        </div>
+
+        <!-- Notification Area -->
+        <div class="notification-area" id="notificationArea"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
