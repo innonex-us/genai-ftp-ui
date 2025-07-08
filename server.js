@@ -13,6 +13,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
+// Add request logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  if (req.body && Object.keys(req.body).length > 0) {
+    console.log('Request body:', req.body);
+  }
+  next();
+});
+
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -37,18 +46,24 @@ async function getFtpConnection(connectionId, config) {
   }
 
   const client = new Client();
+  
   try {
+    console.log(`Attempting FTP connection to ${config.host}:${config.port} with user ${config.username}`);
+    
     await client.access({
       host: config.host,
       port: config.port || 21,
       user: config.username,
       password: config.password,
-      secure: config.secure || false
+      secure: config.secure || false,
+      secureOptions: config.secure ? { rejectUnauthorized: false } : undefined
     });
     
+    console.log(`FTP connection successful for ${connectionId}`);
     ftpConnections.set(connectionId, client);
     return client;
   } catch (error) {
+    console.error(`FTP connection failed for ${connectionId}:`, error.message);
     throw new Error(`FTP connection failed: ${error.message}`);
   }
 }
@@ -59,6 +74,15 @@ async function getFtpConnection(connectionId, config) {
 app.post('/api/connect', async (req, res) => {
   try {
     const { host, port, username, password, secure } = req.body;
+    console.log(`Connection request received for ${host}:${port}`);
+    
+    if (!host || !username || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Host, username, and password are required'
+      });
+    }
+    
     const connectionId = `${host}_${username}_${Date.now()}`;
     
     const client = await getFtpConnection(connectionId, {
@@ -66,15 +90,17 @@ app.post('/api/connect', async (req, res) => {
       port: parseInt(port) || 21,
       username,
       password,
-      secure: secure === 'true'
+      secure: secure === 'true' || secure === true
     });
 
+    console.log(`Connection successful for ${connectionId}`);
     res.json({
       success: true,
       connectionId,
       message: 'Connected successfully'
     });
   } catch (error) {
+    console.error('Connection error:', error);
     res.status(400).json({
       success: false,
       message: error.message
